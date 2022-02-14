@@ -6,8 +6,9 @@ var router = function(){
 
     Router.post('/follow', userController.follow);
     Router.post('/unfollow', userController.unfollow);
-    Router.put('/followrequest', userController.followrequest);
-
+    Router.put('/followrequestacpt', userController.followrequestacpt);
+    Router.put('/followrequestrej', userController.followrequestrej);
+    Router.get('/getfollowers', userController.getfollowers);
     return Router
 }
 

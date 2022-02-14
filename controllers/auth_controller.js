@@ -4,7 +4,19 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { authSchema } = require('../helper/validation_schema');
 const config = require('./config')
-const client = require('twilio')(config.accountSID, config.authToken)
+// const serviceID = "VA301e6c50c6ca9b8f2bb20ca5a61e443c";
+// const accountSid = "AC579d3e39682aa9ef52ef5728d0d12707";
+// const authToken = "fda3eb8440545dcbf591833cb72d6547";
+const serviceID = "VAe824c39ca9715ad0925b6e72fb00d2ef";
+const accountSid = "AC3120ccee4b1bcb655cbce140cb8d49ab";
+const authToken = "ac5d8f40e862e7bca5030e91a7640d0f";
+// "service_SID": "VAe824c39ca9715ad0925b6e72fb00d2ef",
+// "account_SID": "AC3120ccee4b1bcb655cbce140cb8d49ab",
+// "account_Token": "ac5d8f40e862e7bca5030e91a7640d0f"
+// "service_SID": "VAe824c39ca9715ad0925b6e72fb00d2ef",
+// "account_SID": "AC3120ccee4b1bcb655cbce140cb8d49ab",
+// "account_Token": "1cf711f3082b135d7ef5a732d1e40312"
+const client = require('twilio')(accountSid, authToken)
 const allowedFileTypes = ['.mp4', '.mov', '.wmv', '.avi', '.jpeg', '.jpg', '.png', '.gif', '.mp3', '.wav', '.JPG'];
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -96,89 +108,85 @@ exports.updateLocation = async (req, res) => {
     }
 }
 
-// exports.editProfile = async (req, res) => {
+exports.editProfile = async (req, res) => {
 
-//     var file_url, post_type = 'text';
-//     try {
+    var file_url, post_type = 'text';
+    try {
+        if (req.file == undefined) {
+            //post without file
+            file_url = "";     
+        } else {
+            //post with file
+            const file_ext = path.extname(req.file.originalname);
 
-//         console.log(req)
-//         console.log(req.body)
-//         return res.send(req);
-//         if (req.file == undefined) {
-//             //post without file
-//             file_url = "";     
-//         } else {
-//             //post with file
-//             const file_ext = path.extname(req.file.originalname);
+            file_url = `http://https://600e-110-93-244-255.ngrok.io/post_file/${req.file.filename}`;
 
-//             file_url = `http://localhost:5000/post_file/${req.file.filename}`;
+            if(!allowedFileTypes.includes(file_ext)){
+                return res.json({
+                    status: false,
+                    msg: `${file_ext} File type not supported`,
+                    data: []
+                })
+            } 
 
-//             if(!allowedFileTypes.includes(file_ext)){
-//                 return res.json({
-//                     status: false,
-//                     msg: `${file_ext} File type not supported`,
-//                     data: []
-//                 })
-//             } 
-
-//             post_type = getPostType(file_ext);
-//         }
+            // post_type = getPostType(file_ext);
+        }
 
 
-//         const body = req.body;
-//         const { 
-//             user_id,
-//             user_name,
-//             user_bio,
-//             user_title,
-//             user_address,
-//             user_lives,
-//             user_relation,
-//          } = body
+        const body = req.body;
+        const { 
+            user_id,
+            user_name,
+            user_bio,
+            user_title,
+            user_address,
+            user_lives,
+            user_relation,
+         } = body
 
-//          sql.query('SELECT * FROM user WHERE user_id = ?', 
-//          [ user_id ], (err, row) => {
-//              if(!err){
-//                  if(row.length > 0){
+         sql.query('SELECT * FROM user WHERE user_id = ?', 
+         [ user_id ], (err, row) => {
+             if(!err){
+                 if(row.length > 0){
 
-//                      sql.query(`UPDATE user SET user_name = ?, user_bio = ?, user_title = ?,  user_address = ?, user_lives = ?, user_relation = ?, user_image = ? WHERE user_id=${user_id}`, [
-//                         user_name,
-//                         user_bio,
-//                         user_title,
-//                         user_address,
-//                         user_lives,
-//                         user_relation,
-//                         file_url
+                     sql.query(`UPDATE user SET user_name = ?, user_bio = ?, user_title = ?,  user_address = ?, user_lives = ?, user_relation = ?, user_image = ? WHERE user_id=${user_id}`, [
+                        user_name,
+                        user_bio,
+                        user_title,
+                        user_address,
+                        user_lives,
+                        user_relation,
+                        file_url
 
-//               ] , (err, rows) =>{
-//                          if(err){
-//                              return res.json({
-//                                      status: false,
-//                                      msg: err,
-//                                      data: []
-//                               })  
-//                          }else{
-//                           return res.json({
-//                                  status: true,
-//                                  msg: 'Profile updated',
-//                                  data: {
-//                                      "Id": user_id,
-//                                      "User_Images": file_url
-//                                  }
-//                           })  
-//                          }
-//                      }
-//                  )}
-//              }
-//      })
+              ] , (err, rows) =>{
+                         if(err){
+                             return res.json({
+                                     status: false,
+                                     msg: err,
+                                     data: []
+                              })  
+                         }else{
+                          return res.json({
+                                 status: true,
+                                 msg: 'Profile updated',
+                                 data: {
+                                     "Id": user_id,
+                                     "User_Images": file_url
+                                 }
+                          })  
+                         }
+                     }
+                 )}
+             }
+     })
 
 
-//      }
-//     catch(err){
-//         console.log(err)
-//         return res.send(err);
-//     }
-// }
+     }
+    catch(err){
+        console.log(err)
+        return res.send(err);
+    }
+}
 
 //done
 exports.register = async (req, res) => {
@@ -354,12 +362,12 @@ exports.login = async (req, res) => {
 
 //done
 exports.otp = async (req, res) => {
-    console.log("API HIT", req.query.phonenumber)
+    console.log("API HIT", req.query.phonenumber, req.query.channel)
     try {
         if (req.query.phonenumber) {
             client
                 .verify
-                .services(config.serviceID)
+                .services(serviceID)
                 .verifications
                 .create({
                     to: `+${req.query.phonenumber}`,
@@ -371,6 +379,10 @@ exports.otp = async (req, res) => {
                         phonenumber: req.query.phonenumber,
                         data
                     })
+                }).catch((err)=>{
+                    res.status(400).send({
+                        message: err,
+                    })
                 })
         } else {
             res.status(400).send({
@@ -381,7 +393,10 @@ exports.otp = async (req, res) => {
         }
     }
     catch (err) {
-        console.log(err, "error")
+        // console.log(err, "error")
+        res.status(400).send({
+            message: err,
+        })
     }
 }
 
@@ -391,7 +406,7 @@ exports.verify = async (req, res) => {
     if (req.query.phonenumber && (req.query.code).length === 4) {
         client
             .verify
-            .services(config.serviceID)
+            .services(serviceID)
             .verificationChecks
             .create({
                 to: `+${req.query.phonenumber}`,
@@ -413,3 +428,48 @@ exports.verify = async (req, res) => {
         })
     }
 }
+
+
+// exports.updateUser = async (req, res) =>{
+
+//     try {
+//         const { user_name, user_contact, user_address, user_id } = req.body;
+        
+//         if (req.fileValidationError) {
+//             return res.json({
+//                 status: false,
+//                 msg: 'Upload valid file'
+//             }) 
+//        }
+
+//         let image = req.file;
+
+//         let query = 'UPDATE user SET user_name = ?, user_contact = ?, user_address = ? WHERE user_id = ?'
+//         let queryValues = [user_name, user_contact, user_address, user_id]
+
+//         if (image) {
+//             query = 'UPDATE user SET user_name = ?, user_contact = ? , user_address = ?, user_image = ? WHERE user_id = ?'
+//             queryValues = [user_name, user_contact, user_address, image.path, user_id]
+//         }
+        
+
+//         sql.query(query, queryValues, (err, result) =>{
+//             if (!err) {
+//                 return res.json({
+//                     status: true,
+//                     msg: 'User updated successfully'
+//                 })
+//             } else{
+//                 return res.send(err);
+//             }
+//         })
+
+//     } catch(e) {
+//         console.log('Catch an error: ', e);
+//         return res.json({
+//             status: false,
+//             msg: 'Something went wrong'
+//         }) 
+//     }
+
+// }

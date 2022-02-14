@@ -7,7 +7,7 @@ var router = function(){
     Router.post('/register', authController.register);
     Router.post('/login', authController.login);
     Router.get('/userInfo', authController.userInfo);
-    Router.get('/login', authController.otp);
+    Router.get('/otp', authController.otp);
     Router.get('/verify', authController.verify);
     return Router
 }

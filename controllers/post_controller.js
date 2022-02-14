@@ -5,12 +5,12 @@ const path = require('path');
 const { authSchema } = require('../helper/validation_schema');
 const { json } = require('body-parser');
 var foreach = require('async-foreach')
-const allowedFileTypes = [ '.mp4', '.mov', '.wmv', '.avi', '.jpeg', '.jpg', '.png', '.gif', '.mp3', '.wav', '.JPG'];
+const allowedFileTypes = [ '.mp4', '.mov', '.wmv', '.avi', '.jpeg', '.jpg', '.png', '.gif', '.mp3', '.wav', '.JPG', '.PNG'];
 
 function getPostType(file_ext) {
     if (file_ext == '.mp4' || file_ext == '.mov' || file_ext == '.wmv' || file_ext == '.avi') {
         return 'video';
-    } else if (file_ext == '.jpeg' || file_ext == '.jpg' || file_ext == '.png' || file_ext == '.gif'|| file_ext == '.JPG') {
+    } else if (file_ext == '.jpeg' || file_ext == '.jpg' || file_ext == '.png' || file_ext == '.gif'|| file_ext == '.JPG' || file_ext == '.PNG') {
         return 'image';   
     } else if (file_ext == '.mp3' || file_ext == '.wav') {
         return 'audio';
@@ -19,7 +19,7 @@ function getPostType(file_ext) {
 
 // done
 exports.editProfile = async (req, res) => {
- 
+  console.log("SADSAD")
     var file_url, post_type = 'text';
     try {
         if (req.files.length < 0) {
@@ -33,7 +33,7 @@ exports.editProfile = async (req, res) => {
             for(var i = 0; i < req.files.length; i++ ){
                 var obj = req.files[i];
                 const file_ext = path.extname(obj.originalname);
-                file_url = `http://localhost:5000/post_file/${obj.filename}`;
+                file_url = `https://600e-110-93-244-255.ngrok.io/post_file/${obj.filename}`;
                 if(!allowedFileTypes.includes(file_ext)){
                     return res.json({
                         status: false,
@@ -151,7 +151,7 @@ exports.createPost = async (req, res) =>{
         } else {
             //post with file
             const file_ext = path.extname(req.file.originalname);
-            file_url = `http://localhost:5000/post_file/${req.file.filename}`;
+            file_url = `https://600e-110-93-244-255.ngrok.io/post_file/${req.file.filename}`;
             if(!allowedFileTypes.includes(file_ext)){
                 return res.json({
                     status: false,
@@ -263,7 +263,7 @@ exports.updatePost = async (req, res) =>{
             //post with file
             const file_ext = path.extname(req.file.originalname);
 
-            file_url = `http://localhost:5000/post_file/${req.file.filename}`;
+            file_url = `https://600e-110-93-244-255.ngrok.io/post_file/${req.file.filename}`;
 
             if(!allowedFileTypes.includes(file_ext)){
                 return res.json({
