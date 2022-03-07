@@ -6,9 +6,17 @@ var router = function(){
 
     Router.post('/follow', userController.follow);
     Router.post('/unfollow', userController.unfollow);
-    Router.put('/followrequestacpt', userController.followrequestacpt);
+    Router.post('/likecount', userController.likecount);
+    Router.post('/userlike', userController.Userlike);
+    Router.post('/userunlike', userController.UserUnlike);
+
     Router.put('/followrequestrej', userController.followrequestrej);
-    Router.get('/getfollowers', userController.getfollowers);
+    Router.put('/followacpt', userController.followAcpt);
+
+    Router.get('/followstatus', userController.followRequestStatus);
+    Router.get('/getfollowers', userController.getFollowers);
+    Router.get('/userstatus', userController.Userstatus);
+
     return Router
 }
 

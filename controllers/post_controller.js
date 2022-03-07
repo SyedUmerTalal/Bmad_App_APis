@@ -30,7 +30,7 @@ exports.editProfile = async (req, res) => {
             //post with file
             // console.log(req.files.length)
            var file_URL = []
-            for(var i = 0; i < req.files.length; i++ ){
+            for(var i = 0; i < req.files?.length; i++ ){
                 var obj = req.files[i];
                 const file_ext = path.extname(obj.originalname);
                 file_url = `https://600e-110-93-244-255.ngrok.io/post_file/${obj.filename}`;
@@ -63,7 +63,7 @@ exports.editProfile = async (req, res) => {
          sql.query('SELECT * FROM user WHERE user_id = ?', 
          [ user_id ], (err, row) => {
              if(!err){
-                 if(row.length > 0){
+                 if(row?.length > 0){
                      sql.query(`UPDATE user SET user_name = ?, user_bio = ?, user_title = ?,  user_address = ?, user_lives = ?, user_relation = ?, user_image = ?, user_coverImage = ? WHERE user_id=${user_id}`, [
                         user_name,
                         user_bio,
@@ -101,11 +101,75 @@ exports.editProfile = async (req, res) => {
     }
 }
 
+
+function  updateFollow(modify,user_id,follower) {
+    return new  Promise( (resolve, reject) =>  {
+        try{
+            sql.query(`SELECT * FROM following where following_to = ${user_id} AND user_id = ${follower} `, (err, result)=>{    
+                console.log(result)
+                if(result.status == 2){
+                    modify.is_follow = 2;
+                    }else if(result.status == 1){
+                        modify.is_follow = 1;
+                    }else{
+                        modify.is_follow = 0;
+                    }
+            resolve(modify);  
+        });
+        }catch(err){
+            reject(err)
+        }
+      
+    });
+}
+
+function  updateLike(modify,user_id,likes) {
+    return new  Promise( (resolve, reject) =>  {
+        try{
+        sql.query(`SELECT * FROM user_likes where  user_likes  user_id = ${user_id} AND like_by = ${likes}`, (err, result)=>{            
+                    if(result){
+                        modify.is_like = true;
+                    }else{
+                        modify.is_like = false;
+                    }
+                resolve(modify);  
+            });
+        }catch(err){
+            reject(err)
+        }
+    });
+}
+
+function  LikeCount(modify,user_id) {
+    return new  Promise( (resolve, reject) =>  {
+        try{
+
+        
+        sql.query(`SELECT count(like_by) as total_like FROM user_likes where user_id = ${user_id} `, (err, result)=>{        
+           
+        // if(result){
+            if(result?.length>0){
+                modify.like = result[0].total_like;
+            }
+            
+            else{
+                modify.like = 0;
+            }
+             resolve(modify);  
+            
+             
+            });
+        }catch(err){
+            reject(err)
+        }
+    });
+}
+  
 // done
 exports.nearMe = async (req, res) =>{
     try {  
     const body = req.query;
-    const { user_latitude, user_longitude, kilometers } = body
+    const { user_latitude, user_longitude, kilometers, user_id } = body
     // return res.send("Work");
     sql.query(`SELECT * FROM (SELECT *,
         (
@@ -122,14 +186,51 @@ exports.nearMe = async (req, res) =>{
         )
         as distance FROM user
         ) user
-        WHERE distance <= ${kilometers}
+        WHERE distance <= ${kilometers} AND user_id != ${user_id}
         LIMIT 15
         `, (err, result)=>{
             if(!err){
-                return res.send(result); 
-            }else{
-               return res.send(result);  
+            
+                
+                resu = [];
+                resut = [];
+                total = [];
+                 
+               const modify =[]
+                result.map((item)=>{
+                    // console.log(item)
+                    if(item.user_interest){
+                        item.user_interest = JSON.parse(item.user_interest)
+                    }
+                    if(item.user_gender_interest){
+                        item.user_gender_interest = JSON.parse(item.user_gender_interest)
+                    }
+                    if(item.user_favorite){
+                        item.user_favorite = JSON.parse(item.user_favorite)
+                    }
+
+
+                    // item.user_favorite = JSON.parse(item.user_favorite)
+                    // item.user_gender_interest = JSON.parse(item.user_gender_interest)
+
+                    resu.push(updateFollow(item,item.user_id,user_id));
+                    resut.push(updateLike(item,item.user_id,user_id));
+                    total.push(LikeCount(item,item.user_id,user_id));
+
+                    modify.push(resu);
+                    modify.push(resut);
+                    modify.push(total);
+                    
+                })
+
+                Promise.all(resu).then(values => {                    
+                      return res.send(values);
+                }).catch((err)=>{
+                    return res.send(err);
+                  });
+
             }
+            
         })
     } catch(e) {
         console.log('Catch an error: ', e);
@@ -151,7 +252,7 @@ exports.createPost = async (req, res) =>{
         } else {
             //post with file
             const file_ext = path.extname(req.file.originalname);
-            file_url = `https://600e-110-93-244-255.ngrok.io/post_file/${req.file.filename}`;
+            file_url = `https://3a9b-103-244-176-173.ngrok.io/post_file/${req.file.filename}`;
             if(!allowedFileTypes.includes(file_ext)){
                 return res.json({
                     status: false,
@@ -194,7 +295,7 @@ exports.createpostmulti = async (req, res) =>{
     // console.log(req.files.length)
     try {
 
-        if (req.files.length < 0) {
+        if (req.files?.length < 0) {
             //post without file   
             file_url = "";  
             return res.send(`no file select`);
@@ -203,10 +304,10 @@ exports.createpostmulti = async (req, res) =>{
             //post with file
             // console.log(req.files.length)
            var file_URL = []
-            for(var i = 0; i < req.files.length; i++ ){
+            for(var i = 0; i < req.files?.length; i++ ){
                 var obj = req.files[i];
                 const file_ext = path.extname(obj.originalname);
-                file_url = `http://localhost:5000/post_file/${obj.filename}`;
+                file_url = `https://3a9b-103-244-176-173.ngrok.io/post_file/${obj.filename}`;
                 if(!allowedFileTypes.includes(file_ext)){
                     return res.json({
                         status: false,
@@ -626,3 +727,4 @@ exports.deletecomment = async (req, res) =>{
         }) 
     }
 }
+

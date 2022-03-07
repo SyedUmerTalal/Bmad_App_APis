@@ -3,19 +3,14 @@ const sql = require('../connection');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { authSchema } = require('../helper/validation_schema');
-const config = require('./config')
+const config = require('./config');
+// const { JSONParser } = require('formidable/parsers');
 // const serviceID = "VA301e6c50c6ca9b8f2bb20ca5a61e443c";
 // const accountSid = "AC579d3e39682aa9ef52ef5728d0d12707";
 // const authToken = "fda3eb8440545dcbf591833cb72d6547";
 const serviceID = "VAe824c39ca9715ad0925b6e72fb00d2ef";
 const accountSid = "AC3120ccee4b1bcb655cbce140cb8d49ab";
 const authToken = "ac5d8f40e862e7bca5030e91a7640d0f";
-// "service_SID": "VAe824c39ca9715ad0925b6e72fb00d2ef",
-// "account_SID": "AC3120ccee4b1bcb655cbce140cb8d49ab",
-// "account_Token": "ac5d8f40e862e7bca5030e91a7640d0f"
-// "service_SID": "VAe824c39ca9715ad0925b6e72fb00d2ef",
-// "account_SID": "AC3120ccee4b1bcb655cbce140cb8d49ab",
-// "account_Token": "1cf711f3082b135d7ef5a732d1e40312"
 const client = require('twilio')(accountSid, authToken)
 const allowedFileTypes = ['.mp4', '.mov', '.wmv', '.avi', '.jpeg', '.jpg', '.png', '.gif', '.mp3', '.wav', '.JPG'];
 const transporter = nodemailer.createTransport({
@@ -41,10 +36,19 @@ exports.userInfo = async (req, res) => {
         sql.query('SELECT * FROM user WHERE user_id = ?', [user_id], (err, row) => {
 
             if (!err) {
+                if(row[0].user_interest){
+                    row[0].user_interest=JSON.parse(row[0].user_interest)
+                }
+                if(row[0].user_favorite){
+                    row[0].user_favorite=JSON.parse(row[0].user_favorite)
+                }
+                if(row[0].user_gender_interest){
+                    row[0].user_gender_interest=JSON.parse(row[0].user_gender_interest)
+                }
                 return res.json({
                     status: true,
                     msg: "Success",
-                    data: row
+                    data: row[0]
                 })
             } else {
                 return res.json({
